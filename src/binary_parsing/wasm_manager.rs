@@ -25,10 +25,13 @@ pub struct WasmManager {
     pub elements: Vec<(bool, u32, String, Vec<u32>)>,
 
     pub func_names: HashMap<usize, String>,
-    pub export_names: HashMap<usize, String>,
-    pub export_memories: HashMap<usize, String>,
-    pub export_tables: HashMap<usize, String>,
-    pub export_globals: HashMap<usize, String>,
+    
+    // Changed HashMaps to store a Vec<String> instead of String to support multiple export aliases for a single ID.
+    // Previously this did not support aliases. 
+    pub export_names: HashMap<usize, Vec<String>>,
+    pub export_memories: HashMap<usize, Vec<String>>,
+    pub export_tables: HashMap<usize, Vec<String>>,
+    pub export_globals: HashMap<usize, Vec<String>>,
     pub import_names: HashMap<usize, (String, String)>,
 
     pub initial_memory_pages: u32,
@@ -89,8 +92,9 @@ impl WasmManager {
     pub fn parse_func_name(&self, func_id: usize) -> String {
         if func_id < self.import_funcs_count {
             format!("import_{}", func_id)
-        } else if let Some(name) = self.export_names.get(&func_id) {
-            format!("wasm_export_{}", name)
+        } else if let Some(names) = self.export_names.get(&func_id) {
+            // Since an ID can have multiple aliases, we use the first one in the list for the default display name.
+            format!("wasm_export_{}", names[0])
         } else if let Some(name) = self.func_names.get(&func_id) {
             name.clone()
         } else {
@@ -367,10 +371,11 @@ impl WasmManager {
                 let id = reader.read_u32().unwrap_or(0) as usize;
 
                 match kind {
-                    0x00 => { self.export_names.insert(id, name); }     // Funcs
-                    0x01 => { self.export_tables.insert(id, name); }    // Tables
-                    0x02 => { self.export_memories.insert(id, name); }  // Memories
-                    0x03 => { self.export_globals.insert(id, name); }   // Globals
+                    // Using entry().or_default().push() appends new aliases instead of overwriting the previous one.
+                    0x00 => { self.export_names.entry(id).or_default().push(name); }     // Funcs
+                    0x01 => { self.export_tables.entry(id).or_default().push(name); }    // Tables
+                    0x02 => { self.export_memories.entry(id).or_default().push(name); }  // Memories
+                    0x03 => { self.export_globals.entry(id).or_default().push(name); }   // Globals
                     _ => {}
                 }
             }
