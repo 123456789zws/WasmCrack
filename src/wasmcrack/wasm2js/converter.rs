@@ -1754,9 +1754,12 @@ impl Converter {
         // Exports
         self.add_line("\t\texports: {".to_string());
         let mut export_lines = Vec::new();
-        for (id, name) in &manager.export_names {
+        // Iterate through the Vec of aliases and export the function under each alias name.
+        for (id, names) in &manager.export_names {
             let func_name = manager.parse_func_name(*id);
-            export_lines.push(format!("\t\t\t\"{}\": {}", name, func_name));
+            for name in names {
+                export_lines.push(format!("\t\t\t\"{}\": {}", name, func_name));
+            }
         }
         export_lines.push("\t\t\t\"memory\": mem".to_string());
         self.add_line(export_lines.join(",\n"));
