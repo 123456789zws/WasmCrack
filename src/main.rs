@@ -11,6 +11,7 @@ use WasmCrack::wasmcrack::crypto_heuristic_analyzer::crypto_heuristic_analyzer::
 use WasmCrack::wasmcrack::store_ops_data::store_ops_data::StoreOpsData;
 use WasmCrack::wasmcrack::struct_solver::struct_solver::StructSolver;
 use WasmCrack::wasmcrack::xor_stores::xor_stores::XorStores;
+use WasmCrack::wasmcrack::func_lens::func_lens::FuncLens;
 
 fn main() { 
     // Initialize args and bypass initial exe dir
@@ -105,6 +106,13 @@ fn main() {
         let xor_stores_path = project_dir.clone() + "/xor-stores.txt";
         fs::write(&xor_stores_path, &xor_stores_output).unwrap_or_else(|_| {
             panic!("Failed to write to {}", xor_stores_path);
+        });
+
+        println!("Executing func lens parser...");
+        let func_lens_output = FuncLens::rank_func_lens(&wasm2js_engine.func_lens);
+        let func_lens_path = project_dir.clone() + "/func-len-rankings.txt";
+        fs::write(&func_lens_path, &func_lens_output).unwrap_or_else(|_| {
+            panic!("Failed to write to {}", func_lens_path);
         });
 
         println!("\nAll tools successfully executed.\n\n");
