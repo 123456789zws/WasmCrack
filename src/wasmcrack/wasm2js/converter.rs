@@ -16,6 +16,7 @@ pub struct Converter {
     pub func_store_ops: HashMap<String, Vec<(String, String, u32, String, usize)>>,
     pub func_stores_from_common_addrs: HashMap<String, HashMap<String, Vec<(u32, String, String)>>>,
     pub func_xor_stores: HashMap<String, Vec<[String; 4]>>,
+    pub func_lens: Vec<(String, usize)>,
     stack: Vec<DataType>,
     control_stack: Vec<(String, usize, usize, usize, usize, Vec<DataType>)>,
     label_ctr: usize,
@@ -34,6 +35,7 @@ impl Converter {
             func_store_ops: HashMap::new(),
             func_stores_from_common_addrs: HashMap::new(),
             func_xor_stores: HashMap::new(),
+            func_lens: Vec::new(),
             stack: Vec::new(),
             control_stack: Vec::new(),
             label_ctr: 0,
@@ -312,6 +314,7 @@ impl Converter {
             let mut current_func_store_ops = Vec::new();
             let mut current_func_stores_from_common_addrs = HashMap::new();
             let mut current_xor_stores = Vec::new();
+            let mut current_func_len = 0;
             let mut xor_last_op = 0;
             
             // Store i32 and i64 consts we locate seperately, we'll merge these in order 64->32 
@@ -325,6 +328,7 @@ impl Converter {
             while reader.addr < end_addr {
                 let opcode = reader.read_byte().unwrap_or(0);
                 ops_count += 1;
+                current_func_len += 1;
 
                 // xor_last_op works on an increment system. Base is when it is at 0. When a xor op is detected, it becomes one.
                 // We need to let the end of this iteration finish though, before marking it as xor about to not be the last op.
@@ -1685,6 +1689,12 @@ impl Converter {
             self.func_store_ops.insert(func_name.clone(), current_func_store_ops);
             self.func_stores_from_common_addrs.insert(func_name.clone(), current_func_stores_from_common_addrs);
             self.func_xor_stores.insert(func_name.clone(), current_xor_stores);
+
+            // Binary search the func len values so we can rank them, unlike the crypto rankings, 
+            // there are no extra calculations to be done, so we can just binary search here.
+            let func_len_entry = (func_name.clone(), current_func_len);
+            let index = self.func_lens.partition_point(|&(_, size)| size > func_len_entry.1);
+            self.func_lens.insert(index, func_len_entry);
 
             // Push all collected ops into func_crypto_stats.
             self.func_crypto_stats.push((
