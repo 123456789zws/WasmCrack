@@ -51,6 +51,8 @@ WasmCrack currently supports the following automated analysis utilities:
 * **`struct-solver`**: Analyzes the Code Section and locates instances of memory store instructions. However, instead of just outputting the data like `store-ops-data does`, it will attempt to identify structs by identifying stores made at multiple different offsets consecutively. Note that this can also identify structures like arrays/vectors too if it's all the same type. Data is dumped to `potential-structs.txt` in your project directory.
 
 * **`xor-stores`**: Analyzes the Code Section and locates any instances of *direct* xor memory stores. This means that only memory stores that come immediately after an xor instruction are dumped. It is essentially a more powerful and direct analysis of XOR in memory stores compared to the feature store-ops-data has for XOR detection, which is a bit looser. A check for a direct xor store is often a key telltale sign of where encryption/decryption occurs, as many algorithms end with a xor encryption cipher. Data is dumped to `xor-stores.txt` in your project directory.
+
+* **`func-lens`**: Simply tracks and sorts (via binary search insertions) all wasm func lengths. Many WebAssembly compilers will often compile much of the important code for clients (for example the main game loop for .io games), into extremely large funcs. Thus, having a relative ranking and output of func lengths can be useful. Data is dumped to `func-len-rankings.txt` in your project directory.
 ---
 
 ## Planned Features (roadmap)
