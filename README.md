@@ -54,22 +54,3 @@ WasmCrack currently supports the following automated analysis utilities:
 
 * **`func-lens`**: Simply tracks and sorts (via binary search insertions) all wasm func lengths. Many WebAssembly compilers will often compile much of the important code for clients (for example the main game loop for .io games), into extremely large funcs. Thus, having a relative ranking and output of func lengths can be useful. Data is dumped to `func-len-rankings.txt` in your project directory.
 ---
-
-## Planned Features (roadmap)
-
-The following utilities are planned for future releases:
-
-### Features Guaranteed for Implementation (at some point when I have time)
-
-The Following features will NOT be automatically run as the rest of the tools are, as these will require specific specification. Likely during this time, implementation to only run specific tools and analyze only specific funcs (if applicable to said tool), will be added.
--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-* **`local-trace`**: Pinpoint tracing. Specify a Wasm function and a specific local variable, and WasmCrack will map exactly how that local is mutated throughout the function's execution.
-
-* **`mem-trace`**: Memory address monitoring. Specify linear memory addresses to trace how and where those locations are accessed or modified across all functions in the binary.
-
-* **`ctrl-trace`**: Advanced control flow analysis. Will trace complex, heavily nested block structures to analyze and output all possible branch possibilities within a given control structure.
-
-### Proposed Additions (will likely be implemented if I find the time to)
-
-NONE. Feel free to suggest anything.
